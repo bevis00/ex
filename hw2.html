@@ -136,7 +136,7 @@
 	  var dt = clock.getDelta();
 	  keyboard.update();
 
-		if (pos.y <= ballR) 
+		if (pos.y <= ballR * 1.1) 
 	  { 
 	    if (keyboard.down("space")) 
 	    {
@@ -224,8 +224,8 @@
 	    
 	  // bounce back
 	  if (pos.y <= ballR) {
-	    //pos.y = 0;
-	    vel.y *= -.8;
+	    pos.y = 0 + ballR;
+	    vel.y *= -.5;
 	  }
 	  
 	  requestAnimationFrame(animate);
