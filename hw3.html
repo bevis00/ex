@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+
+<html>
+<div id="info">Collision Part 0</div>
+<head>
+<style>
+	#info {
+	  position: absolute;
+	  top: 0px;
+	  width: 100%;
+	  padding: 10px;
+	  text-align: center;
+	  color: #ffff00
+	}
+
+	body {
+	  overflow: hidden;
+	}
+</style>
+</head>
+
+<body>
+
+<audio id="jumpsound" style="display:none">
+<source src="sounds/hw3_jump_sound.wav" type='audio/wav'>
+</audio>
+
+<audio id="soundtrack" autoplay loop style="display:none">
+<source src="sounds/hw3_bgm.wav" type='audio/wav'>
+</audio>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
+<script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
+<script type="text/javascript">document.oncontextmenu=function(){return false;}</script> 
+<script>
+	var camera, scene, renderer;
+	var satellite, angle = 0;
+	var stArray = [];
+	var baseS = 0;
+	var counter = 0;
+	//var stats;
+	var pos, vel, force;
+	var clock = new THREE.Clock();
+	var jumpsound, soundTrack;
+	var ball;
+
+	var keyboard = new KeyboardState();
+
+	var ballR = 6;
+	init();
+	animate();
+
+	function setUpStArray() {
+	  for (var i = 0; i < 3; i++) {
+	    var row = [];
+	    for (var j = 0; j < 9; j++)
+	      row.push(new THREE.Vector2(j * 0.125, 1 - 0.5 * i));
+	    stArray.push(row);
+	  }
+	}
+
+	function height(x) {
+	  if (x <= 0 + ballR)
+	    return 60;
+	  if (x > 0 && x <= 40 + ballR)
+	    return 40;
+	  if (x > 40  && x <= 80 + ballR)
+	    return 20;
+	  if (x >= 140 - ballR && x < 160 - ballR)
+	  	return 20;
+	  if (x >= 160 - ballR && x < 180 - ballR)
+	  	return 40;
+	  if (x >= 180 - ballR && x < 200)
+	  	return 60;
+	  if (x >= 200 - ballR && x < 220 + ballR)
+	  	return 60;
+	  if (x >= 220 - ballR && x < 240 + ballR)
+	  	return 40;
+	  if (x >= 240 - ballR && x < 260 + ballR)
+	  	return 20;
+	  if (x >= 300 - ballR && x < 320 + ballR)
+	  	return 60;
+	   if (x >= 320 && x < 340 - ballR)
+	  	return 20;
+	  if (x >= 340 - ballR && x < 360 + ballR)
+	  	return 40;
+	  if (x >= 380 - ballR && x < 400 + ballR)
+	  	return 20;
+	  else
+	    return 0;
+	}
+
+	function init() {
+	
+	jumpSound = document.getElementById ('jumpsound');
+	soundTrack = document.getElementById ('soundtrack');
+
+	  renderer = new THREE.WebGLRenderer({
+	    antialias: true
+	  });
+
+	  pos = new THREE.Vector3(200, 40, 0);
+	  vel = new THREE.Vector3(0, 0, 0);
+	  //force = new THREE.Vector3(0, -90, 0);
+
+	  /*
+	    // STATS
+	  	stats = new Stats();
+	  	stats.domElement.style.position = 'absolute';
+	  	stats.domElement.style.top = '0px';
+	  	stats.domElement.style.zIndex = 100;
+	  	document.body.appendChild( stats.domElement );	
+	  */
+
+	  renderer.setSize(window.innerWidth, window.innerHeight);
+	  renderer.setClearColor(0x888888);
+	  document.body.appendChild(renderer.domElement);
+
+	  scene = new THREE.Scene();
+	  camera = new THREE.OrthographicCamera(-50, 50, 80, -20, -10, 100);
+	  camera.position.x = 200;
+	  camera.position.z = 10;
+	  scene.add(camera);
+
+	  for (var i = 0; i < 5; i++) 
+	  {
+	    // loading texture from imgur.com
+	    THREE.ImageUtils.crossOrigin = '';
+	    textureBackground = THREE.ImageUtils.loadTexture('http://i.imgur.com/wbKmQF3.jpg');
+	    textureBackground.wrapS = THREE.RepeatWrapping;
+	    // setting up texMat
+	    // Plane with default texture coordinates [0,1]x[0,1]
+	    var texMatBackground = new THREE.MeshBasicMaterial({map: textureBackground});
+	    var background = new THREE.Mesh(new THREE.PlaneGeometry(100, 80), texMatBackground);
+	    background.position.y = 40;
+	    background.position.z = -5;
+	    background.position.x = i * 100;
+	    scene.add(background);
+	  }
+
+	  // what's in the scene? [depth]
+	  // bordere (blue lines) [0]
+	  // satellite (white circle) [1]
+	  // mousePoint (red circle) [2]
+	  // background (dark yellow quad) [3]
+	  //
+	  // all on XY plane: rely on polygonOffset to sort things out
+	  // line object remains at frontmost
+
+	  ////////////////////////////////////////////////////////////////////////////////////////////
+
+	  /*// loading texture from imgur.com
+	  THREE.ImageUtils.crossOrigin = '';
+	  textureBall = THREE.ImageUtils.loadTexture('http://i.imgur.com/IW7Rmpn.jpg');
+	  textureBall.wrapS = THREE.RepeatWrapping;
+	  // setting up texMat
+	  // Plane with default texture coordinates [0,1]x[0,1]
+	  var texMatBall = new THREE.MeshBasicMaterial({map: textureBall});
+	  ball = new THREE.Mesh(new THREE.CircleGeometry(ballR, 20), texMatBall);
+	  ball.position.y = 30;
+	  scene.add(ball);*/
+
+	  for (var j = 0; j < 5; j++) 
+	  {
+	    // loading texture from imgur.com
+	    THREE.ImageUtils.crossOrigin = '';
+	    textureGround = THREE.ImageUtils.loadTexture('http://i.imgur.com/FKLnee8.jpg');
+	    textureGround.wrapS = THREE.RepeatWrapping;
+	    // setting up texMat
+	    // Plane with default texture coordinates [0,1]x[0,1]
+	    var texMatGround = new THREE.MeshBasicMaterial({map: textureGround});
+	    var ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 20), texMatGround);
+	    ground.position.y = -10;
+	    ground.position.x = j * 100;
+	    scene.add(ground);
+	  }
+	  
+	  // loading texture from imgur.com
+	  THREE.ImageUtils.crossOrigin = '';
+	  textureObstacle0 = THREE.ImageUtils.loadTexture('http://i.imgur.com/rkousM7.jpg');
+	  textureObstacle0.wrapS = THREE.RepeatWrapping;
+	  // setting up texMat
+	  // Plane with default texture coordinates [0,1]x[0,1]
+	  var texMatObstacle0 = new THREE.MeshBasicMaterial({map: textureObstacle0});
+	  var Obstacle0 = new THREE.Mesh(new THREE.PlaneGeometry(50, 60), texMatObstacle0);
+		Obstacle0.position.x = -25;
+	  Obstacle0.position.y = 30;
+	  scene.add(Obstacle0);
+	  
+	  // loading texture from imgur.com
+	  THREE.ImageUtils.crossOrigin = '';
+	  textureObstacle1 = THREE.ImageUtils.loadTexture('http://i.imgur.com/HzedDiu.jpg');
+	  textureObstacle1.wrapS = THREE.RepeatWrapping;
+	  // setting up texMat
+	  // Plane with default texture coordinates [0,1]x[0,1]
+	  var texMatObstacle1 = new THREE.MeshBasicMaterial({map: textureObstacle1});
+	  var Obstacle1 = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), texMatObstacle1);
+		Obstacle1.position.x = 150;
+	  Obstacle1.position.y = 10;
+	  scene.add(Obstacle1);
+	  
+	  // loading texture from imgur.com
+	  THREE.ImageUtils.crossOrigin = '';
+	  textureObstacle2 = THREE.ImageUtils.loadTexture('http://i.imgur.com/PE3oMO3.jpg');
+	  textureObstacle2.wrapS = THREE.RepeatWrapping;
+	  // setting up texMat
+	  // Plane with default texture coordinates [0,1]x[0,1]
+	  var texMatObstacle2 = new THREE.MeshBasicMaterial({map: textureObstacle2});
+	  var Obstacle2 = new THREE.Mesh(new THREE.PlaneGeometry(20, 40), texMatObstacle2);
+		Obstacle2.position.x = 170;
+	  Obstacle2.position.y = 20;
+	  scene.add(Obstacle2);
+	  
+	  // loading texture from imgur.com
+	  THREE.ImageUtils.crossOrigin = '';
+	  textureObstacle3 = THREE.ImageUtils.loadTexture('http://i.imgur.com/pMnKinz.jpg');
+	  textureObstacle3.wrapS = THREE.RepeatWrapping;
+	  // setting up texMat
+	  // Plane with default texture coordinates [0,1]x[0,1]
+	  var texMatObstacle3 = new THREE.MeshBasicMaterial({map: textureObstacle3});
+	  var Obstacle3 = new THREE.Mesh(new THREE.PlaneGeometry(20, 60), texMatObstacle3);
+		Obstacle3.position.x = 190;
+	  Obstacle3.position.y = 30;
+	  scene.add(Obstacle3);
+	  
+	  // loading texture from imgur.com
+	  THREE.ImageUtils.crossOrigin = '';
+	  textureObstacle4 = THREE.ImageUtils.loadTexture('http://i.imgur.com/pMnKinz.jpg');
+	  textureObstacle4.wrapS = THREE.RepeatWrapping;
+	  // setting up texMat
+	  // Plane with default texture coordinates [0,1]x[0,1]
+	  var texMatObstacle4 = new THREE.MeshBasicMaterial({map: textureObstacle4});
+	  var Obstacle4 = new THREE.Mesh(new THREE.PlaneGeometry(20, 60), texMatObstacle4);
+		Obstacle4.position.x = 210;
+	  Obstacle4.position.y = 30;
+	  scene.add(Obstacle4);
+	  
+	  // loading texture from imgur.com
+	  THREE.ImageUtils.crossOrigin = '';
+	  textureObstacle5 = THREE.ImageUtils.loadTexture('http://i.imgur.com/PE3oMO3.jpg');
+	  textureObstacle5.wrapS = THREE.RepeatWrapping;
+	  // setting up texMat
+	  // Plane with default texture coordinates [0,1]x[0,1]
+	  var texMatObstacle5 = new THREE.MeshBasicMaterial({map: textureObstacle5});
+	  var Obstacle5 = new THREE.Mesh(new THREE.PlaneGeometry(20, 40), texMatObstacle5);
+		Obstacle5.position.x = 230;
+	  Obstacle5.position.y = 20;
+	  scene.add(Obstacle5);
+	  
+	  // loading texture from imgur.com
+	  THREE.ImageUtils.crossOrigin = '';
+	  textureObstacle6 = THREE.ImageUtils.loadTexture('http://i.imgur.com/HzedDiu.jpg');
+	  textureObstacle6.wrapS = THREE.RepeatWrapping;
+	  // setting up texMat
+	  // Plane with default texture coordinates [0,1]x[0,1]
+	  var texMatObstacle6 = new THREE.MeshBasicMaterial({map: textureObstacle6});
+	  var Obstacle6 = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), texMatObstacle6);
+		Obstacle6.position.x = 250;
+	  Obstacle6.position.y = 10;
+	  scene.add(Obstacle6);
+	  
+	  // loading texture from imgur.com
+	  THREE.ImageUtils.crossOrigin = '';
+	  textureObstacle7 = THREE.ImageUtils.loadTexture('http://i.imgur.com/pMnKinz.jpg');
+	  textureObstacle7.wrapS = THREE.RepeatWrapping;
+	  // setting up texMat
+	  // Plane with default texture coordinates [0,1]x[0,1]
+	  var texMatObstacle7 = new THREE.MeshBasicMaterial({map: textureObstacle7});
+	  var Obstacle7 = new THREE.Mesh(new THREE.PlaneGeometry(20, 60), texMatObstacle7);
+		Obstacle7.position.x = 310;
+	  Obstacle7.position.y = 30;
+	  scene.add(Obstacle7);
+	  
+	  // loading texture from imgur.com
+	  THREE.ImageUtils.crossOrigin = '';
+	  textureObstacle8 = THREE.ImageUtils.loadTexture('http://i.imgur.com/PE3oMO3.jpg');
+	  textureObstacle8.wrapS = THREE.RepeatWrapping;
+	  // setting up texMat
+	  // Plane with default texture coordinates [0,1]x[0,1]
+	  var texMatObstacle8 = new THREE.MeshBasicMaterial({map: textureObstacle8});
+	  var Obstacle8 = new THREE.Mesh(new THREE.PlaneGeometry(20, 40), texMatObstacle8);
+		Obstacle8.position.x = 350;
+	  Obstacle8.position.y = 20;
+	  scene.add(Obstacle8);
+	  
+	  // loading texture from imgur.com
+	  THREE.ImageUtils.crossOrigin = '';
+	  textureObstacle9 = THREE.ImageUtils.loadTexture('http://i.imgur.com/HzedDiu.jpg');
+	  textureObstacle9.wrapS = THREE.RepeatWrapping;
+	  // setting up texMat
+	  // Plane with default texture coordinates [0,1]x[0,1]
+	  var texMatObstacle9 = new THREE.MeshBasicMaterial({map: textureObstacle9});
+	  var Obstacle9 = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), texMatObstacle9);
+		Obstacle9.position.x = 390;
+	  Obstacle9.position.y = 10;
+	  scene.add(Obstacle9);
+	  
+	  // loading texture from imgur.com
+	  THREE.ImageUtils.crossOrigin = '';
+	  textureObstacle10 = THREE.ImageUtils.loadTexture('http://i.imgur.com/D0ZIb1J.jpg');
+	  textureObstacle10.wrapS = THREE.RepeatWrapping;
+	  // setting up texMat
+	  // Plane with default texture coordinates [0,1]x[0,1]
+	  var texMatObstacle10 = new THREE.MeshBasicMaterial({map: textureObstacle10});
+	  var Obstacle10 = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), texMatObstacle10);
+		Obstacle10.position.x = 20;
+	  Obstacle10.position.y = 20;
+	  scene.add(Obstacle10);
+	  
+	  // loading texture from imgur.com
+	  THREE.ImageUtils.crossOrigin = '';
+	  textureObstacle11 = THREE.ImageUtils.loadTexture('http://i.imgur.com/n6kiq7B.jpg');
+	  textureObstacle11.wrapS = THREE.RepeatWrapping;
+	  // setting up texMat
+	  // Plane with default texture coordinates [0,1]x[0,1]
+	  var texMatObstacle11 = new THREE.MeshBasicMaterial({map: textureObstacle11});
+	  var Obstacle11 = new THREE.Mesh(new THREE.PlaneGeometry(40, 20), texMatObstacle11);
+		Obstacle11.position.x = 60;
+	  Obstacle11.position.y = 10;
+	  scene.add(Obstacle11);
+	  
+	  // loading texture from imgur.com
+	  THREE.ImageUtils.crossOrigin = '';
+	  textureObstacle12 = THREE.ImageUtils.loadTexture('http://i.imgur.com/HzedDiu.jpg');
+	  textureObstacle12.wrapS = THREE.RepeatWrapping;
+	  // setting up texMat
+	  // Plane with default texture coordinates [0,1]x[0,1]
+	  var texMatObstacle12 = new THREE.MeshBasicMaterial({map: textureObstacle12});
+	  var Obstacle12 = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), texMatObstacle12);
+		Obstacle12.position.x = 330;
+	  Obstacle12.position.y = 10;
+	  scene.add(Obstacle12);
+
+	  window.addEventListener('resize', onWindowResize, false);
+	  //  window.addEventListener('mousedown', onDocumentMouseDown, false);
+	  
+	  ///////////////////////////////////////////////////////////////////////
+	    
+	    setUpStArray();
+
+	  // loading texture from imgur.com
+	  THREE.ImageUtils.crossOrigin = '';
+	  textureRole = THREE.ImageUtils.loadTexture('http://i.imgur.com/E2r0Qt0.png');
+	  textureRole.wrapS = THREE.RepeatWrapping;
+
+	  // setting up texMat
+	  var texMatRole = new THREE.MeshBasicMaterial({
+	    map: textureRole,
+	    transparent: true,  // cutout texture: set transparent: true
+	    side: THREE.DoubleSide
+	  });
+
+	  var geometry = new THREE.Geometry();
+	  geometry.vertices.push(
+	    new THREE.Vector3(-7, -7, 0),
+	    new THREE.Vector3(7, -7, 0),
+	    new THREE.Vector3(7, 7, 0),
+	    new THREE.Vector3(-7, 7, 0)
+	  );
+
+	  var face;
+	  face = new THREE.Face3(0, 1, 2);
+	  geometry.faces.push(face);
+	  face = new THREE.Face3(0, 2, 3);
+	  geometry.faces.push(face);
+
+	  geometry.faceVertexUvs[0].push([stArray[1][0], stArray[1][1], stArray[0][1]]);
+	  geometry.faceVertexUvs[0].push([stArray[1][0], stArray[0][1], stArray[0][0]]);
+
+	  geometry.computeBoundingSphere();
+	  geometry.computeFaceNormals();
+	  geometry.computeVertexNormals();
+
+	  ball = new THREE.Mesh(geometry, texMatRole);
+	  scene.add(ball);
+
+		// for character moving left
+		//sprite.rotation.y = Math.PI;
+	}
+
+	function onWindowResize() {
+	  camera.aspect = window.innerWidth / window.innerHeight;
+	  camera.updateProjectionMatrix();
+	  renderer.setSize(window.innerWidth, window.innerHeight);
+	}
+
+
+	function spriteAnimate() {
+	  var geometry = ball.geometry;
+	  var st0 = stArray[1][baseS];
+	  var st1 = stArray[1][baseS + 1];
+	  var st2 = stArray[0][baseS + 1];
+	  var st3 = stArray[0][baseS];
+
+	  geometry.faceVertexUvs[0] = [];
+	  geometry.faceVertexUvs[0].push([st0, st1, st2]);
+	  geometry.faceVertexUvs[0].push([st0, st2, st3]);
+	  geometry.uvsNeedUpdate = true;
+
+	  baseS = (baseS + 1) % 8;
+	}
+
+	function animate() {
+
+	  var dt = clock.getDelta();
+	  keyboard.update();
+
+			counter++;
+	  if (counter % 4 === 0)
+	    spriteAnimate();
+	    
+	  if(vel.x > 0)
+	  {
+	    ball.rotation.y = 0;
+	  }
+	    
+	  if(vel.x < 0)
+	  {
+	  	ball.rotation.y = Math.PI;
+	  }
+
+	  if (pos.y <= (ballR + height(pos.x)) * 1.15)
+	  {
+	    if (keyboard.down("space")) 
+	    {
+	      vel.y += 70;
+	      jumpSound.play();
+	    }
+	  }
+
+	  if (vel.x < 50) 
+	  {
+	    if (keyboard.down("right")) 
+	    {
+	      vel.x += 50;
+	    }
+	  }
+
+	  if (vel.x > -50) 
+	  {
+	    if (keyboard.down("left")) 
+	    {
+	      vel.x += -50;
+	    }
+	  }
+
+	  if (camera.position.x <= 0)
+	  {
+	    camera.position.x = 0;
+	  }
+
+	  if (camera.position.x >= 400) 
+	  {
+	    camera.position.x = 400;
+	  }
+
+
+	  if (ball.position.x >= 450 - ballR) 
+	  {
+	    pos.x = 450 - ballR;
+	  }
+
+	  if (ball.position.x <= -50 + ballR) 
+	  {
+	    pos.x = -50 + ballR;
+	  }
+
+	  //////////////////////////////////////////////////////////////////////////////////////  
+
+	  // force: add gravity first
+	  force = new THREE.Vector3(0, -90, 0);
+
+	  // then do Euler's
+	 
+
+	  // bounce back
+	  /*if (pos.y <= ballR) 
+	  {
+	    pos.y = 0 + ballR;
+	    vel.y *= -.5;
+	  }*/
+
+
+
+	  if (pos.y <= ballR + height(pos.x)) 
+	  {
+	    pos.y = ballR + height(pos.x);
+	    vel.y *= -.1;
+	    // if contact, add contact force
+	    force.add(new THREE.Vector3(0, 90, 0));
+	  }
+
+	  // add contact force    
+	  // determine whether it is possible to make the horizontal move
+	  var sign = (vel.x) > 0 ? +1 : -1;
+	  if (pos.y < height(pos.x + 1 * sign)) 
+	  {
+	    vel.x = 0;
+	  }
+
+	  vel.add(force.clone().multiplyScalar(dt));
+	  pos.add(vel.clone().multiplyScalar(dt));
+	  ball.position.copy(pos);
+
+	  if (ball.position.x - camera.position.x > 20 && camera.position.x < 400) 
+	  {
+	    camera.position.x += vel.clone().multiplyScalar(dt).x;
+	  }
+	  if (camera.position.x - ball.position.x > 20 && camera.position.x > 0) 
+	  {
+	    camera.position.x += vel.clone().multiplyScalar(dt).x;
+	  }
+
+	  requestAnimationFrame(animate);
+	  render();
+	}
+
+	function render() {
+	  renderer.render(scene, camera);
+	}
+</script>
+</body>
+
+</html>
