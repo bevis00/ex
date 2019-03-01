@@ -31,8 +31,8 @@
 </head>
 
 <body> 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
-<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/102/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.min.js"></script>
 <script>
 	var scene, renderer, camera, controls;
@@ -845,8 +845,7 @@
 
 	  controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-	  var gridXZ = new THREE.GridHelper(500, 10);
-	  gridXZ.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
+	  var gridXZ = new THREE.GridHelper(1000, 50, 0xffffff, 0xffffff);
 	  scene.add(gridXZ);
 	  window.addEventListener('resize', onWindowResize, false);
 
