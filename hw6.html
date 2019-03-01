@@ -47,18 +47,8 @@
 </head>
 
 <body> 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
-<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js"></script>
-=======
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/102/three.min.js"></script>
 <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
->>>>>>> master
-=======
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/102/three.min.js"></script>
-<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
->>>>>>> master
 <script src="https://rawgit.com/jyunming-chen/game3js/master/js/ccdbox.js"></script>
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js"></script>
@@ -216,18 +206,8 @@
 	  
 	  //////////////////////////////////////////////////////////////////////////
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-	  var gridXZ = new THREE.GridHelper(600, 10);
-	  gridXZ.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
-=======
 	  var gridXZ = new THREE.GridHelper(600, 10, 0xffffff, 0xffffff);
->>>>>>> master
-	  scene.add(gridXZ);
-=======
-	  var gridXZ = new THREE.GridHelper(600, 10, 0xffffff, 0xffffff);
-	  scene.add(gridXZ); 
->>>>>>> master
+	  scene.add(gridXZ);  
 
 	  tsphere = new THREE.Mesh(new THREE.BoxGeometry(7, 7, 7), new THREE.MeshBasicMaterial({
 	    wireframe: true
