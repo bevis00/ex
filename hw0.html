@@ -12,8 +12,8 @@
 </head>
 
 <body> 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r78/three.min.js"></script>
-<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/102/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
 <script>
 	var renderer, scene, camera;
 	var controls;
@@ -35,7 +35,7 @@
 	  renderer.setClearColor(0x888888);
 
 	  scene = new THREE.Scene();
-	  var grid = new THREE.GridHelper(10, 1, 0xaaaa00, 0x333333);
+	  var grid = new THREE.GridHelper(30, 10, 0xaaaa00, 0x333333);
 	  scene.add(grid);
 	  var axes = new THREE.AxisHelper(5);
 	  scene.add(axes);
