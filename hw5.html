@@ -26,6 +26,7 @@
 	  position: absolute;
 	  left: 20px;
 	  height: 300px;
+	  visibility: hidden;
 	}
 </style>
 </head>
@@ -1083,7 +1084,7 @@
 
 	function keyframe(t) {
 	  var s = ((t - ts) % T) / T;
-	  console.log(s);
+	//   console.log(s);
 
 	  for (var i = 0; i < keys.length; i++) {
 	    if (keys[i][0] > s) 
@@ -1099,7 +1100,7 @@
 	    intKey.push(keys[ii][1][j] * (1 - a) + keys[ii + 1][1][j] * a);
 	  }
 
-	  console.log(intKey);
+	//   console.log(intKey);
 	}
 
 	function render() {

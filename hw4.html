@@ -80,7 +80,7 @@
 	    	if (tmpProj.clone().sub(tmp).length() < 30 + 3) {
 	      	
 	      	if (tmpProj.length() < 5 *this.vel.length()) {
-	        	console.log ('block & close');
+	        	// console.log ('block & close');
 	    			this.force.add (tmpProj.clone().sub(tmp).multiplyScalar(2));    	
 	        }
 	      }
@@ -95,7 +95,7 @@
 	    	if (tmpProj1.clone().sub(tmp1).length() < 35 + 3) {
 	      	
 	      	if (tmpProj1.length() < 5 *this.vel.length()) {
-	        	console.log ('block & close');
+	        	// console.log ('block & close');
 	    			this.force.add (tmpProj1.clone().sub(tmp1).multiplyScalar(2));    	
 	        }
 	      }
@@ -110,7 +110,7 @@
 	    	if (tmpProj2.clone().sub(tmp2).length() < 40 + 3) {
 	      	
 	      	if (tmpProj2.length() < 5 *this.vel.length()) {
-	        	console.log ('block & close');
+	        	// console.log ('block & close');
 	    			this.force.add (tmpProj2.clone().sub(tmp2).multiplyScalar(2));    	
 	        }
 	      }
@@ -125,7 +125,7 @@
 	    	if (tmpProj3.clone().sub(tmp3).length() < 25 + 3) {
 	      	
 	      	if (tmpProj3.length() < 5 *this.vel.length()) {
-	        	console.log ('block & close');
+	        	// console.log ('block & close');
 	    			this.force.add (tmpProj3.clone().sub(tmp3).multiplyScalar(2));    	
 	        }
 	      }
@@ -222,35 +222,35 @@
 	  
 	  ////////////////////////////////////////////////////////
 	  
-	  plane = new THREE.Mesh (new THREE.PlaneGeometry(200,200), new THREE.MeshBasicMaterial({visible:false}));
+	  plane = new THREE.Mesh (new THREE.PlaneGeometry(300,300), new THREE.MeshBasicMaterial({visible:false}));
 	  scene.add (plane);
 	  plane.rotation.x = -Math.PI/2;
 		pickables = [plane];
 	  
 	  raycaster = new THREE.Raycaster();
-	  document.addEventListener('mousedown', onDocumentMouseDown, false);
+	  document.addEventListener('pointerdown', onDocumentMouseDown, false);
 	  
 	  ////////////////////////////////////////////////////////
 	  
-	  var ob = new THREE.Mesh (new THREE.CircleGeometry (30,20));
+	  var ob = new THREE.Mesh (new THREE.CircleGeometry (30,20), new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff } ));
 	  ob.position.x = -20;
 	  ob.position.z = -55;
 	  ob.rotation.x = -Math.PI/2;
 	  scene.add (ob);
 	  
-	  var ob1 = new THREE.Mesh (new THREE.CircleGeometry (35,20));
+	  var ob1 = new THREE.Mesh (new THREE.CircleGeometry (35,20), new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff } ));
 	  ob1.position.x = 60;
 	  ob1.position.z = -10;
 	  ob1.rotation.x = -Math.PI/2;
 	  scene.add (ob1);
 	  
-	  var ob2 = new THREE.Mesh (new THREE.CircleGeometry (40,20));
+	  var ob2 = new THREE.Mesh (new THREE.CircleGeometry (40,20), new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff } ));
 	  ob2.position.x = -50;
 	  ob2.position.z = 50;
 	  ob2.rotation.x = -Math.PI/2;
 	  scene.add (ob2);
 	  
-	  var ob3 = new THREE.Mesh (new THREE.CircleGeometry (25,20));
+	  var ob3 = new THREE.Mesh (new THREE.CircleGeometry (25,20), new THREE.MeshBasicMaterial( { color: Math.random() * 0xffffff } ));
 	  ob3.position.x = 40;
 	  ob3.position.z = 60;
 	  ob3.rotation.x = -Math.PI/2;
